@@ -6,55 +6,55 @@ import useAxiosSecure from "../../Hooks/useAxiosSecure";
 import { Link } from "react-router-dom";
 
 const ManageItems = () => {
-    const [menu, refetch] = UseMenu();
+    const [menu, isLoading, refetch] = UseMenu();
     const axiosSecure = useAxiosSecure();
 
-  const handleDeleteItem = async (item) => {
-    try {
-        const result = await Swal.fire({
-            title: "Are you sure?",
-            text: "You won't be able to revert this!",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, delete it!",
-        });
+    const handleDeleteItem = async (item) => {
+        try {
+            const result = await Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, delete it!",
+            });
 
-        if (result.isConfirmed) {
-            console.log(`Deleting item with ID: ${item._id}`);
-            const res = await axiosSecure.delete(`/menu/${item._id}`);
+            if (result.isConfirmed) {
+                console.log(`Deleting item with ID: ${item._id}`);
+                const res = await axiosSecure.delete(`/menu/${item._id}`);
 
-            if (!res.data || res.data.deletedCount === undefined) {
-                throw new Error('Unexpected response format');
+                if (!res.data || res.data.deletedCount === undefined) {
+                    throw new Error('Unexpected response format');
+                }
+
+                if (res.data.deletedCount > 0) {
+                    refetch();
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "success",
+                        title: `${item.name} has been deleted`,
+                        showConfirmButton: false,
+                        timer: 1500,
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "info",
+                        title: "Not Found",
+                        text: "The item you are trying to delete does not exist.",
+                    });
+                }
             }
-
-            if (res.data.deletedCount > 0) {
-                refetch();
-                Swal.fire({
-                    position: "top-end",
-                    icon: "success",
-                    title: `${item.name} has been deleted`,
-                    showConfirmButton: false,
-                    timer: 1500,
-                });
-            } else {
-                Swal.fire({
-                    icon: "info",
-                    title: "Not Found",
-                    text: "The item you are trying to delete does not exist.",
-                });
-            }
+        } catch (error) {
+            console.error("Error deleting item:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: `There was a problem deleting the item: ${error.message}. Please try again.`,
+            });
         }
-    } catch (error) {
-        console.error("Error deleting item:", error);
-        Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: `There was a problem deleting the item: ${error.message}. Please try again.`,
-        });
-    }
-};
+    };
 
 
     return (
